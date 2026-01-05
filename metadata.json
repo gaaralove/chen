@@ -1,0 +1,9 @@
+{
+  "name": "DroidMind ",
+  "description": "专为安卓设计的高扩展性智能助手，具备插件化架构、用户画像引擎及系统级操控模拟。内置极速订餐功能。",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
