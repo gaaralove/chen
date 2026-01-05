@@ -11,7 +11,9 @@ export const FoodDeliveryPlugin: AssistantPlugin = {
     icon: 'ChefHat',
     description: '核心功能：基于地理位置与历史画像的自动化订餐建议。',
     version: '9.6.0',
-    capabilities: ['geo_profile_sync', 'one_tap_order', 'accessibility_crawler']
+    capabilities: ['geo_profile_sync', 'one_tap_order', 'accessibility_crawler'],
+    // Added category to satisfy PluginManifest interface requirements
+    category: 'service'
   },
 
   checkIntent: (input: string) => {

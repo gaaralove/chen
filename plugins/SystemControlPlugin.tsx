@@ -10,7 +10,9 @@ export const SystemControlPlugin: AssistantPlugin = {
     icon: 'Zap',
     description: 'Android 底层资源动态重分配与进程管控。',
     version: '2.6.0',
-    capabilities: ['ram_boost', 'process_kill', 'battery_save']
+    capabilities: ['ram_boost', 'process_kill', 'battery_save'],
+    // Added category to satisfy PluginManifest interface requirements
+    category: 'system'
   },
 
   checkIntent: (input: string) => {

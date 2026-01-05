@@ -19,6 +19,15 @@ export interface OrderRecord {
   locationName: string;
 }
 
+export interface DeviceStats {
+  cpuUsage: number;
+  ramFree: string;
+  temp: number;
+  batteryLevel: number;
+  isCharging: boolean;
+  uptime: string;
+}
+
 /**
  * 【用户画像动态模型】
  * 基于插件反馈、历史订单和交互频率生成的加权特征库
@@ -38,6 +47,7 @@ export interface UserProfile {
     activeTimeRange: string; 
   };
   orderHistory: OrderRecord[]; 
+  deviceHistory?: DeviceStats[];
 }
 
 export interface AppAction {
@@ -55,6 +65,7 @@ export interface PluginManifest {
   description: string;
   version: string;
   capabilities: string[];
+  category: 'system' | 'utility' | 'service';
 }
 
 export interface AssistantPlugin {
