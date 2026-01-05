@@ -1,13 +1,17 @@
 
 import { GoogleGenAI, Modality } from "@google/genai";
-import { LLMConfig, LLMProvider } from "../types";
-import { APP_CONFIG } from "./config";
+import { LLMConfig } from "../types";
 
-/**
- * 统一大模型分发器 - 严格遵循 Google GenAI SDK 规范
- */
+// 确保在浏览器环境下也能安全访问环境变量
+const getApiKey = () => {
+  return (window as any).process?.env?.API_KEY || (process as any)?.env?.API_KEY || "";
+};
+
 export const callLLM = async (prompt: string, config: LLMConfig) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const apiKey = getApiKey();
+  if (!apiKey) return "未检测到系统密钥 (API_KEY)";
+  
+  const ai = new GoogleGenAI({ apiKey });
   const modelId = config.modelName || 'gemini-3-flash-preview';
   
   try {
@@ -15,24 +19,22 @@ export const callLLM = async (prompt: string, config: LLMConfig) => {
       model: modelId,
       contents: prompt,
       config: {
-        systemInstruction: "你不是AI助手，你是 DroidMind 系统核心内核。回复规则：1. 严禁使用'我建议'、'作为一个AI'、'你好'等废话。2. 必须以极简、指令化的风格回复。3. 优先输出执行结果或关键数据。4. 如果是复杂任务，直接列出步骤。5. 语言风格：系统原生、硬核、高效、中文。",
+        systemInstruction: "你现在是 DroidMind 系统的智能内核。1. 严禁废话，直接输出结果。2. 必须以硬核、系统指令化的中文风格回复。3. 复杂任务分步列出。4. 保持绝对的高效与原生感。",
         temperature: 0.7,
       }
     });
-    
-    // 正确使用 .text 属性而不是方法
     return response.text?.trim() || "内核无响应";
   } catch (error) {
     console.error("LLM Call Error:", error);
-    return "核心链路连接超时";
+    return "核心链路连接超时，请检查网络或密钥状态。";
   }
 };
 
-/**
- * 语音合成引擎 - 生成原始 PCM 音频
- */
 export const generateSpeech = async (text: string) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const apiKey = getApiKey();
+  if (!apiKey) return null;
+
+  const ai = new GoogleGenAI({ apiKey });
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
@@ -46,7 +48,6 @@ export const generateSpeech = async (text: string) => {
         },
       },
     });
-    // 访问 inlineData.data 获取 base64 音频
     return response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data || null;
   } catch (e) {
     console.error("TTS Error:", e);
@@ -54,10 +55,6 @@ export const generateSpeech = async (text: string) => {
   }
 };
 
-/**
- * 原始 PCM 数据解码函数
- * 遵循指南：Gemini TTS 返回的是无头的原始 PCM 数据
- */
 async function decodeAudioData(
   data: Uint8Array,
   ctx: AudioContext,
@@ -77,9 +74,6 @@ async function decodeAudioData(
   return buffer;
 }
 
-/**
- * 裸数据 PCM 播放器
- */
 export const decodeAndPlayAudio = async (base64Audio: string) => {
   try {
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
@@ -90,7 +84,6 @@ export const decodeAndPlayAudio = async (base64Audio: string) => {
     }
 
     const audioBuffer = await decodeAudioData(bytes, ctx, 24000, 1);
-    
     const source = ctx.createBufferSource();
     source.buffer = audioBuffer;
     source.connect(ctx.destination);
